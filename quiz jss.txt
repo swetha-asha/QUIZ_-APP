@@ -1,0 +1,118 @@
+const quizzes = [
+    {
+        title: "General Knowledge",
+        questions: [
+            {
+                question: "What is the capital of France?",
+                options: ["Berlin", "Madrid", "Paris", "Rome"],
+                answer: "Paris"
+            },
+            {
+                question: "Who wrote 'Romeo and Juliet'?",
+                options: ["Mark Twain", "William Shakespeare", "Charles Dickens", "J.K. Rowling"],
+                answer: "William Shakespeare"
+            }
+        ]
+    },
+    {
+        title: "Science",
+        questions: [
+            {
+                question: "What is H2O commonly known as?",
+                options: ["Oxygen", "Water", "Hydrogen", "Helium"],
+                answer: "Water"
+            },
+            {
+                question: "What planet is known as the Red Planet?",
+                options: ["Earth", "Mars", "Jupiter", "Saturn"],
+                answer: "Mars"
+            }
+        ]
+    }
+];
+
+let currentQuiz, currentQuestionIndex, score;
+
+document.getElementById("start-random-quiz").addEventListener("click", startRandomQuiz);
+
+function startRandomQuiz() {
+    currentQuiz = quizzes[Math.floor(Math.random() * quizzes.length)];
+    startQuiz();
+}
+
+function startQuiz() {
+    currentQuestionIndex = 0;
+    score = 0;
+    document.getElementById("home-screen").classList.add("hidden");
+    document.getElementById("quiz-screen").classList.remove("hidden");
+    displayQuestion();
+}
+
+function displayQuestion() {
+    const questionObj = currentQuiz.questions[currentQuestionIndex];
+    document.getElementById("question").textContent = questionObj.question;
+    const optionsList = document.getElementById("options");
+    optionsList.innerHTML = '';
+    
+    questionObj.options.forEach(option => {
+        const li = document.createElement('li');
+        li.textContent = option;
+        li.onclick = () => selectOption(option);
+        optionsList.appendChild(li);
+    });
+}
+
+function selectOption(selected) {
+    const options = document.querySelectorAll('#options li');
+    options.forEach(option => option.classList.remove('selected'));
+    
+    const selectedOption = [...options].find(option => option.textContent === selected);
+    if (selectedOption) {
+        selectedOption.classList.add('selected');
+    }
+}
+
+document.getElementById("submit-answer").addEventListener("click", submitAnswer);
+
+function submitAnswer() {
+    const selectedOption = document.querySelector('#options li.selected');
+    if (!selectedOption) return;
+
+    const userAnswer = selectedOption.textContent;
+    const correctAnswer = currentQuiz.questions[currentQuestionIndex].answer;
+    
+    if (userAnswer === correctAnswer) {
+        score++;
+    }
+    
+    currentQuestionIndex++;
+    if (currentQuestionIndex < currentQuiz.questions.length) {
+        displayQuestion();
+    } else {
+        showResults();
+    }
+}
+
+function showResults() {
+    document.getElementById("quiz-screen").classList.add("hidden");
+    document.getElementById("result-screen").classList.remove("hidden");
+    document.getElementById("final-score").textContent = `${score} out of ${currentQuiz.questions.length}`;
+}
+
+document.getElementById("restart-quiz").addEventListener("click", () => {
+    document.getElementById("result-screen").classList.add("hidden");
+    document.getElementById("home-screen").classList.remove("hidden");
+});
+
+// Load quizzes on the home screen
+quizzes.forEach(quiz => {
+    const li = document.createElement('li');
+    li.textContent = quiz.title;
+    li.onclick = () => startSelectedQuiz(quiz);
+    document.getElementById("quiz-list").appendChild(li);
+});
+
+function startSelectedQuiz(quiz) {
+    currentQuiz = quiz;
+    startQuiz();
+}
